@@ -5,10 +5,15 @@ import YouTube from 'react-youtube'
 
 interface VideoPlayerWithTimeLimitProps {
   videoId: string
-  timeLimit: number // в секундах
+  timeLimit: number // in seconds
+  exitFullscreenBeforeEnd?: number // seconds before end to exit fullscreen
 }
 
-const VideoPlayerWithTimeLimit: React.FC<VideoPlayerWithTimeLimitProps> = ({ videoId, timeLimit }) => {
+const VideoPlayerWithTimeLimit: React.FC<VideoPlayerWithTimeLimitProps> = ({
+  videoId,
+  timeLimit,
+  exitFullscreenBeforeEnd = 0
+}) => {
   const [player, setPlayer] = useState<any>(null)
   const [timeRemaining, setTimeRemaining] = useState(timeLimit)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -18,10 +23,24 @@ const VideoPlayerWithTimeLimit: React.FC<VideoPlayerWithTimeLimitProps> = ({ vid
     setPlayer(event.target)
   }
 
+  const exitFullscreen = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch((err) => console.error(err))
+    } else if (player?.getIframe()) {
+      const iframe = player.getIframe()
+      if (iframe.requestFullscreen) {
+        iframe.requestFullscreen()
+      }
+    }
+  }
+
   const startTimer = () => {
     if (intervalRef.current) return
     intervalRef.current = setInterval(() => {
       setTimeRemaining((prevTime) => {
+        if (prevTime <= exitFullscreenBeforeEnd) {
+          exitFullscreen()
+        }
         if (prevTime <= 0) {
           clearInterval(intervalRef.current as NodeJS.Timeout)
           player?.pauseVideo()
@@ -71,8 +90,8 @@ const VideoPlayerWithTimeLimit: React.FC<VideoPlayerWithTimeLimitProps> = ({ vid
         onReady={onReady}
         onStateChange={onStateChange}
       />
-      <p>Оставшееся время: {timeRemaining} секунд</p>
-      {timeRemaining <= 0 && <p>Время просмотра истекло!</p>}
+      <p>Time remaining: {timeRemaining} seconds</p>
+      {timeRemaining <= 0 && <p>Viewing time has expired!</p>}
     </div>
   )
 }
