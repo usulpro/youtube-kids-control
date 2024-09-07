@@ -1,6 +1,6 @@
 'use client';
 
-import ControllableYoutubePlayer from '@/components/ControllableYoutubePlayer';
+import ControllableYoutubePlayer from '@/components/ControllableYoutubePlayer/ControllableYoutubePlayer';
 import LinearProgressBar from '@/components/LinearProgressBar';
 import { VIDEO_CONFIG } from '@/config';
 
