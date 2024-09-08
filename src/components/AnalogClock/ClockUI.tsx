@@ -1,5 +1,4 @@
 import React from 'react';
-import { FiCoffee, FiBook, FiTv, FiMoon, FiSun, FiHeart } from 'react-icons/fi';
 
 type IntervalStatus = 'passed' | 'current' | 'upcoming';
 
@@ -19,19 +18,37 @@ type ClockUIProps = {
   intervals: Interval[];
 };
 
-const clockTheme = {
+const clockThemeLight = {
   colors: {
-    background: 'white',
-    border: 'black',
-    hourHand: '#646464',
+    background: '#ffffff',
+    border: '#383838',
+    hourHand: '#494949',
     minuteHand: 'black',
     secondHand: '#ff8282',
     text: '#525252',
-    outerCircle: '#E5E7EB',
-    outerCircleTransparent: 'rgba(229, 231, 235, 0.3)',
+    outerCircle: '#adb1ba',
+    outerCircleTransparent: 'rgba(104, 108, 118, 0.132)',
   },
   opacity: {
-    current: 1,
+    current: 0.7,
+    upcoming: 0.4,
+    passed: 0.2,
+  },
+};
+
+const clockTheme = {
+  colors: {
+    background: '#1b2023',
+    border: '#727272',
+    hourHand: '#6c6c6c',
+    minuteHand: '#ffffff',
+    secondHand: '#ff8282',
+    text: '#d1d1d1',
+    outerCircle: '#396298',
+    outerCircleTransparent: 'rgba(31, 47, 70, 0.767)',
+  },
+  opacity: {
+    current: 0.7,
     upcoming: 0.4,
     passed: 0.2,
   },
@@ -52,27 +69,105 @@ const ClockUI: React.FC<ClockUIProps> = ({
   const secondAngle = seconds * 6;
 
   const hourHandLength = radius * 0.5;
-  const minuteHandLength = radius * 0.7;
-  const secondHandLength = radius * 0.8;
+  const minuteHandLength = radius * 0.75;
+  const secondHandLength = radius * 0.85;
 
   const createHand = (
     angle: number,
     length: number,
-    width: number,
     color: string,
+    handType: 'hour' | 'minute' | 'second',
   ) => {
-    const x2 = center + length * Math.sin((angle * Math.PI) / 180);
-    const y2 = center - length * Math.cos((angle * Math.PI) / 180);
-    return (
-      <line
-        x1={center}
-        y1={center}
-        x2={x2}
-        y2={y2}
-        stroke={color}
-        strokeWidth={width}
-      />
-    );
+    const radians = (angle * Math.PI) / 180;
+    const x2 = center + length * Math.sin(radians);
+    const y2 = center - length * Math.cos(radians);
+
+    let path = '';
+
+    switch (handType) {
+      case 'hour':
+        const hourBaseWidth = 4; // Уменьшено с 8 до 6
+        const hourTipWidth = 2; // Уменьшено с 4 до 3
+        path = createTaperingHand(radians, length, hourBaseWidth, hourTipWidth);
+        break;
+      case 'minute':
+        const minuteBaseWidth = 6;
+        const minuteTipWidth = 2;
+        path = createTaperingHand(
+          radians,
+          length,
+          minuteBaseWidth,
+          minuteTipWidth,
+        );
+        break;
+      case 'second':
+        const secondWidth = 2;
+        const counterweightLength = length * 0.2;
+        path = createSecondHand(
+          radians,
+          length,
+          secondWidth,
+          counterweightLength,
+        );
+        break;
+    }
+
+    return <path d={path} fill={color} stroke={color} strokeWidth="0.5" />;
+  };
+
+  const createTaperingHand = (
+    radians: number,
+    length: number,
+    baseWidth: number,
+    tipWidth: number,
+  ) => {
+    const baseX1 = center + (baseWidth / 2) * Math.cos(radians);
+    const baseY1 = center + (baseWidth / 2) * Math.sin(radians);
+    const baseX2 = center - (baseWidth / 2) * Math.cos(radians);
+    const baseY2 = center - (baseWidth / 2) * Math.sin(radians);
+
+    const tipX1 =
+      center + length * Math.sin(radians) + (tipWidth / 2) * Math.cos(radians);
+    const tipY1 =
+      center - length * Math.cos(radians) + (tipWidth / 2) * Math.sin(radians);
+    const tipX2 =
+      center + length * Math.sin(radians) - (tipWidth / 2) * Math.cos(radians);
+    const tipY2 =
+      center - length * Math.cos(radians) - (tipWidth / 2) * Math.sin(radians);
+
+    return `
+      M ${baseX1} ${baseY1}
+      L ${tipX1} ${tipY1}
+      L ${tipX2} ${tipY2}
+      L ${baseX2} ${baseY2}
+      A ${baseWidth / 2} ${baseWidth / 2} 0 0 1 ${baseX1} ${baseY1}
+      Z
+    `;
+  };
+
+  const createSecondHand = (
+    radians: number,
+    length: number,
+    width: number,
+    counterweightLength: number,
+  ) => {
+    const x2 = center + length * Math.sin(radians);
+    const y2 = center - length * Math.cos(radians);
+    const cwX = center - counterweightLength * Math.sin(radians);
+    const cwY = center + counterweightLength * Math.cos(radians);
+
+    const baseX1 = center + (width / 2) * Math.cos(radians);
+    const baseY1 = center + (width / 2) * Math.sin(radians);
+    const baseX2 = center - (width / 2) * Math.cos(radians);
+    const baseY2 = center - (width / 2) * Math.sin(radians);
+
+    return `
+      M ${baseX1} ${baseY1}
+      L ${x2} ${y2}
+      L ${baseX2} ${baseY2}
+      L ${cwX} ${cwY}
+      Z
+    `;
   };
 
   const createMarker = (minute: number) => {
@@ -164,16 +259,16 @@ const ClockUI: React.FC<ClockUIProps> = ({
         <circle
           cx={iconX}
           cy={iconY}
-          r="8"
+          r={radius * 0.07}
           fill={interval.color}
-          stroke="white"
+          stroke={interval.color}
           strokeWidth="1"
-          opacity={opacity}
+          opacity="1"
         />
-        <foreignObject x={iconX - 6} y={iconY - 6} width="12" height="12">
+        <foreignObject x={iconX - 4} y={iconY - 4} width="12" height="12">
           {React.cloneElement(interval.icon, {
             className: `${interval.icon.props.className} absolute`,
-            style: { color: 'white', width: '100%', height: '100%', opacity },
+            style: { color: 'white', width: '60%', height: '60%', opacity: 1 },
           })}
         </foreignObject>
       </g>
@@ -188,18 +283,18 @@ const ClockUI: React.FC<ClockUIProps> = ({
         <circle
           cx={center}
           cy={center}
-          r={radius * 1.25}
-          fill="none"
+          r={radius * 1.24}
+          fill={clockTheme.colors.background}
           stroke={clockTheme.colors.outerCircleTransparent}
-          strokeWidth="2"
+          strokeWidth={radius * 0.06}
         />
         <circle
           cx={center}
           cy={center}
-          r={radius * 1.2}
+          r={radius * 1.22}
           fill="none"
           stroke={clockTheme.colors.outerCircle}
-          strokeWidth="2"
+          strokeWidth={radius * 0.03}
         />
         <circle
           cx={center}
@@ -215,21 +310,26 @@ const ClockUI: React.FC<ClockUIProps> = ({
         {[...Array(60)].map((_, i) => createMinuteNumber(i))}
         {[...Array(60)].map((_, i) => createMarker(i))}
 
-        {createHand(hourAngle, hourHandLength, 4, clockTheme.colors.hourHand)}
+        {createHand(
+          hourAngle,
+          hourHandLength,
+          clockTheme.colors.hourHand,
+          'hour',
+        )}
         {createHand(
           minuteAngle,
           minuteHandLength,
-          2,
           clockTheme.colors.minuteHand,
+          'minute',
         )}
         {createHand(
           secondAngle,
           secondHandLength,
-          1,
           clockTheme.colors.secondHand,
+          'second',
         )}
 
-        <circle cx={center} cy={center} r="3" fill={clockTheme.colors.border} />
+        <circle cx={center} cy={center} r="4" fill={clockTheme.colors.border} />
       </g>
     </svg>
   );
