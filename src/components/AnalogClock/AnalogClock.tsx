@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import ClockUI from './ClockUI';
 
+type IntervalStatus = 'passed' | 'current' | 'upcoming';
+
 type Interval = {
   startTime: string;
   endTime: string;
   icon: React.ReactElement;
   color: string;
   label: string;
+  status?: IntervalStatus;
 };
 
 type AnalogClockProps = {
@@ -29,9 +32,12 @@ const AnalogClock: React.FC<AnalogClockProps> = ({ intervals }) => {
 
   useEffect(() => {
     const filterIntervals = (currentTime: Date) => {
-      const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+      const currentMinutes =
+        currentTime.getHours() * 60 + currentTime.getMinutes();
       const fiveMinutesAgo = new Date(currentTime.getTime() - 5 * 60000);
-      const fortyFiveMinutesLater = new Date(currentTime.getTime() + 45 * 60000);
+      const fortyFiveMinutesLater = new Date(
+        currentTime.getTime() + 45 * 60000,
+      );
 
       return intervals.reduce((acc: Interval[], interval: Interval) => {
         const start = new Date(`1970-01-01T${interval.startTime}:00`);
@@ -49,7 +55,17 @@ const AnalogClock: React.FC<AnalogClockProps> = ({ intervals }) => {
         }
 
         if (endMinutes > currentMinutes + 45) {
-          newInterval.endTime = fortyFiveMinutesLater.toTimeString().slice(0, 5);
+          newInterval.endTime = fortyFiveMinutesLater
+            .toTimeString()
+            .slice(0, 5);
+        }
+
+        if (endMinutes <= currentMinutes) {
+          newInterval.status = 'passed';
+        } else if (startMinutes > currentMinutes) {
+          newInterval.status = 'upcoming';
+        } else {
+          newInterval.status = 'current';
         }
 
         return [...acc, newInterval];
