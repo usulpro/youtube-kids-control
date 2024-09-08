@@ -16,7 +16,7 @@ const Home: React.FC = () => {
       <h1 className="text-3xl font-bold mb-8 text-gray-800">
         Детское расписание
       </h1>
-      <div className="bg-white rounded-lg shadow-xl p-6 w-[600px] h-[600px]">
+      <div className="bg-white rounded-lg shadow-xl p-6 w-[800px] h-[800px]">
         <AnalogClock
           intervals={intervals}
           onIntervalChange={handleIntervalChange}
