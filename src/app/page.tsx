@@ -1,6 +1,6 @@
 'use client';
 
-import ControllableYoutubePlayer from '@/components/ControllableYoutubePlayer/ControllableYoutubePlayer';
+import ControllableYoutubePlayer from '@/modules/ControllableYoutubePlayer/ControllableYoutubePlayer';
 import { VIDEO_CONFIG } from '@/config';
 
 export default function Home() {

@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
-import AnalogClock from '@/components/AnalogClock/AnalogClock';
-import { generateTestIntervals } from '@/components/AnalogClock/_tests_/getIntervals';
+import AnalogClock from '@/modules/AnalogClock/AnalogClock';
+import { generateTestIntervals } from '@/modules/AnalogClock/_tests_/getIntervals';
 
 const intervals = generateTestIntervals();
 
@@ -19,7 +19,7 @@ const Home: React.FC = () => {
       <div className="bg-white rounded-lg shadow-xl p-6 w-[800px] h-[600px]">
         <AnalogClock
           intervals={intervals}
-          onIntervalChange={handleIntervalChange}
+          // onIntervalChange={handleIntervalChange}
         />
       </div>
       <div className="mt-8 bg-white rounded-lg shadow-lg p-6">

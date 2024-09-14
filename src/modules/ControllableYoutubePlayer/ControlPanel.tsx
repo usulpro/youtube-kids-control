@@ -106,16 +106,26 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
+      <div className="flex items-center space-x-2 text-white mb-4">
+        <input
+          type="range"
+          min="0"
+          max={duration}
+          value={currentTime}
+          onChange={(e) => onSeek(Number(e.target.value))}
+          className="custom-range flex-grow"
+        />
+      </div>
       <div className="flex items-center justify-between mb-2">
-        <button
-          onClick={onTogglePlay}
-          disabled={isTimeLimitReached}
-          aria-label={isPlaying ? 'Pause video' : 'Play video'}
-          className="text-white focus:outline-none"
-        >
-          {isPlaying ? <MdPause size={24} /> : <MdPlayArrow size={24} />}
-        </button>
         <div className="flex items-center space-x-4">
+          <button
+            onClick={onTogglePlay}
+            disabled={isTimeLimitReached}
+            aria-label={isPlaying ? 'Pause video' : 'Play video'}
+            className="text-white focus:outline-none"
+          >
+            {isPlaying ? <MdPause size={24} /> : <MdPlayArrow size={24} />}
+          </button>
           <button
             onClick={toggleMute}
             aria-label={isMuted ? 'Unmute' : 'Mute'}
@@ -131,6 +141,11 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             onChange={(e) => handleVolumeChange(Number(e.target.value))}
             className="w-24"
           />
+          <span>{formatTime(currentTime)}</span>
+          <span>{'/'}</span>
+          <span>{formatTime(duration)}</span>
+        </div>
+        <div className="flex items-center space-x-4">
           <button
             aria-label="Settings"
             className="text-white focus:outline-none"
@@ -155,18 +170,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             )}
           </button>
         </div>
-      </div>
-      <div className="flex items-center space-x-2 text-white">
-        <span>{formatTime(currentTime)}</span>
-        <input
-          type="range"
-          min="0"
-          max={duration}
-          value={currentTime}
-          onChange={(e) => onSeek(Number(e.target.value))}
-          className="flex-grow"
-        />
-        <span>{formatTime(duration)}</span>
       </div>
     </div>
   );
