@@ -16,6 +16,7 @@ type ClockUIProps = {
   minutes: number;
   seconds: number;
   intervals: Interval[];
+  theme?: 'light' | 'dark';
 };
 
 const clockThemeLight = {
@@ -36,7 +37,7 @@ const clockThemeLight = {
   },
 };
 
-const clockTheme = {
+const clockThemeDark = {
   colors: {
     background: '#1b2023',
     border: '#727272',
@@ -54,12 +55,19 @@ const clockTheme = {
   },
 };
 
+const themes = {
+  light: clockThemeLight,
+  dark: clockThemeDark
+}
+
 const ClockUI: React.FC<ClockUIProps> = ({
   hours,
   minutes,
   seconds,
   intervals,
+  theme = 'light',
 }) => {
+  const clockTheme = themes[theme];
   const radius = 100;
   const center = radius;
   const padding = radius * 0.3;
