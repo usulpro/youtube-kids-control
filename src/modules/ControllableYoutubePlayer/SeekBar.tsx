@@ -30,9 +30,9 @@ const defaultTheme = {
     playedProgress: '#920606', // Red
     availableTime: '#10B981', // Green
     disabledOpacity: 0.7, // Reduced opacity for disabled state
-    thumb: '#920606', // White
-    thumbBorder: '#920606', // Black
-    thumbActive: '#920606', // Red when active
+    thumb: '#920606', // Thumb color
+    thumbBorder: '#920606', // Thumb border color
+    thumbActive: '#920606', // Thumb color when active
   },
   sizes: {
     height: 24, // Height of the component
@@ -40,6 +40,8 @@ const defaultTheme = {
     thumbDiameter: 12, // Diameter of the draggable thumb
   },
 };
+
+const FLASH_THRESHOLD = 10; // seconds
 
 const SeekBar: React.FC<SeekBarProps> = ({
   currentTime,
@@ -51,6 +53,9 @@ const SeekBar: React.FC<SeekBarProps> = ({
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragTime, setDragTime] = useState<number>(currentTime);
+  const [animatedDragTime, setAnimatedDragTime] = useState<number>(currentTime);
+  const [flashOpacity, setFlashOpacity] = useState(1);
+  const animationRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Merge the default theme with the provided theme
@@ -71,6 +76,44 @@ const SeekBar: React.FC<SeekBarProps> = ({
     }
   }, [currentTime, isDragging]);
 
+  // Smooth transition of the thumb
+  useEffect(() => {
+    if (isDragging) {
+      // Directly set animatedDragTime when dragging
+      setAnimatedDragTime(dragTime);
+      return;
+    }
+
+    if (animationRef.current !== null) {
+      cancelAnimationFrame(animationRef.current);
+    }
+
+    const startTime = performance.now();
+    const initialTime = animatedDragTime;
+    const deltaTime = dragTime - initialTime;
+    const durationMs = 200; // Animation duration in milliseconds
+
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / durationMs, 1);
+      const newAnimatedTime = initialTime + deltaTime * progress;
+      setAnimatedDragTime(newAnimatedTime);
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(animate);
+      } else {
+        animationRef.current = null;
+      }
+    };
+
+    animationRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationRef.current !== null) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [dragTime, isDragging]);
+
   const handleMouseDown = (e: React.MouseEvent) => {
     if (availableTime === 0) return;
     setIsDragging(true);
@@ -87,6 +130,7 @@ const SeekBar: React.FC<SeekBarProps> = ({
     pos = Math.max(0, Math.min(pos, rect.width));
     const newTime = (pos / rect.width) * duration;
     setDragTime(newTime);
+    setAnimatedDragTime(newTime); // Update animated time immediately during drag
   };
 
   const handleMouseUp = (e: MouseEvent) => {
@@ -122,12 +166,12 @@ const SeekBar: React.FC<SeekBarProps> = ({
   };
 
   // Calculate percentages for positioning
-  const playedPercent = (dragTime / duration) * 100;
+  const playedPercent = (animatedDragTime / duration) * 100;
 
   let availableStartPercent = 0;
   let availableWidthPercent = 0;
   if (availableTime !== undefined && availableTime > 0) {
-    const availableStartTime = dragTime;
+    const availableStartTime = animatedDragTime;
     const availableEndTime = Math.min(availableStartTime + availableTime, duration);
     availableStartPercent = (availableStartTime / duration) * 100;
     availableWidthPercent = ((availableEndTime - availableStartTime) / duration) * 100;
@@ -135,6 +179,33 @@ const SeekBar: React.FC<SeekBarProps> = ({
 
   // Determine if the component should be disabled
   const isDisabled = availableTime === 0;
+
+  // Determine if the seek bar should flash
+  const shouldFlash =
+    availableTime !== undefined &&
+    availableTime > 0 &&
+    availableTime < FLASH_THRESHOLD;
+
+  // Handle flashing effect
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    if (shouldFlash) {
+      intervalId = setInterval(() => {
+        setFlashOpacity((prev) => (prev === 1 ? 0.5 : 1));
+      }, 500); // Adjust the interval as needed
+    } else {
+      setFlashOpacity(1);
+    }
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [shouldFlash]);
+
+  const computedOpacity = isDisabled
+    ? mergedTheme.colors.disabledOpacity
+    : flashOpacity;
 
   return (
     <div
@@ -144,13 +215,13 @@ const SeekBar: React.FC<SeekBarProps> = ({
       className="relative w-full"
       style={{
         height: `${mergedTheme.sizes.height}px`,
-        opacity: isDisabled ? mergedTheme.colors.disabledOpacity : 1,
+        opacity: computedOpacity,
         cursor: isDisabled ? 'not-allowed' : 'pointer',
       }}
       onMouseDown={handleMouseDown}
       onClick={handleClick}
     >
-      <svg width="100%" height="100%" className='overflow-visible'>
+      <svg width="100%" height="100%" className="overflow-visible">
         {/* Base Track */}
         <rect
           x="0"
@@ -163,7 +234,9 @@ const SeekBar: React.FC<SeekBarProps> = ({
         {availableTime !== undefined && availableTime > 0 && (
           <rect
             x={`${availableStartPercent}%`}
-            y={mergedTheme.sizes.height / 2 - mergedTheme.sizes.trackThickness / 2}
+            y={
+              mergedTheme.sizes.height / 2 - mergedTheme.sizes.trackThickness / 2
+            }
             width={`${availableWidthPercent}%`}
             height={mergedTheme.sizes.trackThickness}
             fill={mergedTheme.colors.availableTime}
@@ -183,7 +256,11 @@ const SeekBar: React.FC<SeekBarProps> = ({
             cx={`${playedPercent}%`}
             cy={`${mergedTheme.sizes.height / 2}`}
             r={mergedTheme.sizes.thumbDiameter / 2}
-            fill={isDragging ? mergedTheme.colors.thumbActive : mergedTheme.colors.thumb}
+            fill={
+              isDragging
+                ? mergedTheme.colors.thumbActive
+                : mergedTheme.colors.thumb
+            }
             stroke={mergedTheme.colors.thumbBorder}
             strokeWidth="2"
             style={{ cursor: 'pointer' }}
