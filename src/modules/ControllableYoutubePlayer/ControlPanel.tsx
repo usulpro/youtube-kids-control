@@ -9,6 +9,7 @@ import {
   MdFullscreen,
   MdFullscreenExit,
 } from 'react-icons/md';
+import SeekBar from './SeekBar';
 
 interface ControlPanelProps {
   isPlaying: boolean;
@@ -106,14 +107,21 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="flex items-center space-x-2 text-white mb-4">
-        <input
+      <div className="relative flex items-center space-x-2 text-white mb-4">
+        {/* <input
           type="range"
           min="0"
           max={duration}
           value={currentTime}
           onChange={(e) => onSeek(Number(e.target.value))}
           className="custom-range flex-grow"
+        /> */}
+        <SeekBar
+          currentTime={currentTime}
+          duration={duration}
+          onSeek={onSeek}
+          onTogglePlayPause={onTogglePlay}
+          availableTime={timeRemaining}
         />
       </div>
       <div className="flex items-center justify-between mb-2">
