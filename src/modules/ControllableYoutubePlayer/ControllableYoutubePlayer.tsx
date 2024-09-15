@@ -5,11 +5,13 @@ import ControlPanel from './ControlPanel';
 interface YouTubePlayerProps {
   videoId: string;
   timeLimit: number; // in seconds
+  onPlayPause?: (isPlaying: boolean) => void; // New prop
 }
 
 const ControllableYoutubePlayer: React.FC<YouTubePlayerProps> = ({
   videoId,
   timeLimit,
+  onPlayPause,
 }) => {
   const [timeRemaining, setTimeRemaining] = useState(timeLimit);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -65,12 +67,14 @@ const ControllableYoutubePlayer: React.FC<YouTubePlayerProps> = ({
       if (!isTimeLimitReached) {
         setIsPlaying(true);
         startTimer();
+        if (onPlayPause) onPlayPause(true); // Call the callback
       } else {
         event.target.pauseVideo();
       }
     } else {
       setIsPlaying(false);
       stopTimer();
+      if (onPlayPause) onPlayPause(false); // Call the callback
     }
   };
 

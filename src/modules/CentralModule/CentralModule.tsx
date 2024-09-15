@@ -74,9 +74,9 @@ const CentralModule: React.FC = () => {
     return new Date(date.getTime() + seconds * 1000);
   };
 
-  const handlePlayPause = () => {
+  const handlePlayPause = (isPlaying: boolean) => {
     if (isBreak) return;
-    setIsPlaying((prev) => !prev);
+    setIsPlaying(isPlaying);
   };
 
   const handleTimeUpdate = () => {
@@ -112,11 +112,9 @@ const CentralModule: React.FC = () => {
       <ControllableYoutubePlayer
         videoId="wVH6vZiWrl8"
         timeLimit={watchTimeRemaining}
+        onPlayPause={handlePlayPause}
       />
       <AnalogClock intervals={intervals} />
-      <button onClick={handlePlayPause}>
-        {isPlaying ? 'Pause' : 'Play'}
-      </button>
     </div>
   );
 };
