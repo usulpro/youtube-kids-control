@@ -12,11 +12,24 @@ type Interval = {
   status?: IntervalStatus;
 };
 
-type AnalogClockProps = {
-  intervals: Interval[];
+type Options = {
+  showIcons: boolean;
 };
 
-const AnalogClock: React.FC<AnalogClockProps> = ({ intervals }) => {
+type AnalogClockProps = {
+  intervals: Interval[];
+  options: Options;
+};
+
+const defaultOptions: Options = {
+  showIcons: true,
+};
+
+const AnalogClock: React.FC<AnalogClockProps> = ({
+  intervals,
+  options = defaultOptions,
+}) => {
+  const { showIcons = defaultOptions.showIcons } = options;
   const [time, setTime] = useState<Date>(new Date());
   const [filteredIntervals, setFilteredIntervals] = useState<Interval[]>([]);
 
@@ -85,6 +98,7 @@ const AnalogClock: React.FC<AnalogClockProps> = ({ intervals }) => {
       minutes={minutes}
       seconds={seconds}
       intervals={filteredIntervals}
+      showIcons={showIcons}
     />
   );
 };

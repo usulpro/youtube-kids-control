@@ -1,26 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import ControllableYoutubePlayer from '@/modules/ControllableYoutubePlayer/ControllableYoutubePlayer';
 import AnalogClock from '@/modules/AnalogClock/AnalogClock';
+import { Interval } from './types';
 
-type Interval = {
-  startTime: string;
-  endTime: string;
-  icon: React.ReactElement;
-  color: string;
-  label: string;
-};
 
-const WATCH_TIME = 2 * 60; // 15 minutes in seconds
+
+const WATCH_TIME = 8 * 60; // 15 minutes in seconds
 const BREAK_TIME = 2 * 60; // 10 minutes in seconds
 
 const CentralModule: React.FC = () => {
   const [intervals, setIntervals] = useState<Interval[]>([]);
   const [periodStartTime, setPeriodStartTime] = useState<Date>(new Date());
   const [currentPeriodEndTime, setCurrentPeriodEndTime] = useState<Date>(
-    new Date()
+    new Date(),
   );
   const [currentPeriodType, setCurrentPeriodType] = useState<'watch' | 'break'>(
-    'watch'
+    'watch',
   );
   const [isPlaying, setIsPlaying] = useState(false);
   const [totalPauseTimeDuringWatchPeriod, setTotalPauseTimeDuringWatchPeriod] =
@@ -38,10 +33,10 @@ const CentralModule: React.FC = () => {
       setCurrentPeriodType(parsedState.currentPeriodType);
       setIsPlaying(parsedState.isPlaying);
       setTotalPauseTimeDuringWatchPeriod(
-        parsedState.totalPauseTimeDuringWatchPeriod
+        parsedState.totalPauseTimeDuringWatchPeriod,
       );
       setLastPauseTime(
-        parsedState.lastPauseTime ? new Date(parsedState.lastPauseTime) : null
+        parsedState.lastPauseTime ? new Date(parsedState.lastPauseTime) : null,
       );
       setTimeLimit(parsedState.timeLimit);
     } else {
@@ -93,7 +88,7 @@ const CentralModule: React.FC = () => {
       // Resuming play
       if (lastPauseTime) {
         const pauseDuration = Math.floor(
-          (now.getTime() - lastPauseTime.getTime()) / 1000
+          (now.getTime() - lastPauseTime.getTime()) / 1000,
         );
 
         if (currentPeriodType === 'watch') {
@@ -110,9 +105,7 @@ const CentralModule: React.FC = () => {
             return;
           } else {
             // Add to totalPauseTimeDuringWatchPeriod
-            setTotalPauseTimeDuringWatchPeriod(
-              (prev) => prev + pauseDuration
-            );
+            setTotalPauseTimeDuringWatchPeriod((prev) => prev + pauseDuration);
           }
         }
         setLastPauseTime(null);
@@ -130,7 +123,7 @@ const CentralModule: React.FC = () => {
 
     // Calculate remaining time
     const remainingTime = Math.floor(
-      (currentPeriodEndTime.getTime() - now.getTime()) / 1000
+      (currentPeriodEndTime.getTime() - now.getTime()) / 1000,
     );
     setTimeLimit(remainingTime > 0 ? remainingTime : 0);
 
@@ -143,7 +136,7 @@ const CentralModule: React.FC = () => {
         // Adjust break time
         const adjustedBreakTime = Math.max(
           0,
-          BREAK_TIME - totalPauseTimeDuringWatchPeriod
+          BREAK_TIME - totalPauseTimeDuringWatchPeriod,
         );
 
         setPeriodStartTime(now);
@@ -182,7 +175,7 @@ const CentralModule: React.FC = () => {
   const updateIntervals = (
     startTime: Date,
     periodType: 'watch' | 'break',
-    duration: number
+    duration: number,
   ) => {
     const intervals: Interval[] = [];
     let currentTime = startTime;
@@ -231,11 +224,13 @@ const CentralModule: React.FC = () => {
         videoId="wVH6vZiWrl8"
         onPlayPause={handlePlayPause}
         timeLimit={timeLimit}
-        isPlaying={isPlaying && currentPeriodType === 'watch'} // Prevent playing during break
+        isPlaying={isPlaying && currentPeriodType === 'watch'}
+        renderWidget={() => (
+          <div className="w-96">
+            <AnalogClock intervals={intervals} options={{ showIcons: false }} />
+          </div>
+        )}
       />
-      <div className="w-96">
-        <AnalogClock intervals={intervals} />
-      </div>
     </div>
   );
 };

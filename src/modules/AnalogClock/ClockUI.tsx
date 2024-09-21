@@ -17,6 +17,7 @@ type ClockUIProps = {
   seconds: number;
   intervals: Interval[];
   theme?: 'light' | 'dark';
+  showIcons: boolean;
 };
 
 const clockThemeLight = {
@@ -57,8 +58,8 @@ const clockThemeDark = {
 
 const themes = {
   light: clockThemeLight,
-  dark: clockThemeDark
-}
+  dark: clockThemeDark,
+};
 
 const ClockUI: React.FC<ClockUIProps> = ({
   hours,
@@ -66,6 +67,7 @@ const ClockUI: React.FC<ClockUIProps> = ({
   seconds,
   intervals,
   theme = 'light',
+  showIcons,
 }) => {
   const clockTheme = themes[theme];
   const radius = 100;
@@ -262,23 +264,32 @@ const ClockUI: React.FC<ClockUIProps> = ({
     const opacity = clockTheme.opacity[interval.status];
 
     return (
-      <g key={interval.startTime}>
+      <g key={interval.startTime} xlinkTitle={interval.label}>
         <path d={path} fill={interval.color} opacity={opacity} />
-        <circle
-          cx={iconX}
-          cy={iconY}
-          r={radius * 0.07}
-          fill={interval.color}
-          stroke={interval.color}
-          strokeWidth="1"
-          opacity="1"
-        />
-        <foreignObject x={iconX - 4} y={iconY - 4} width="12" height="12">
-          {React.cloneElement(interval.icon, {
-            className: `${interval.icon.props.className} absolute`,
-            style: { color: 'white', width: '60%', height: '60%', opacity: 1 },
-          })}
-        </foreignObject>
+        {showIcons ? (
+          <>
+            <circle
+              cx={iconX}
+              cy={iconY}
+              r={radius * 0.07}
+              fill={interval.color}
+              stroke={interval.color}
+              strokeWidth="1"
+              opacity="1"
+            />
+            <foreignObject x={iconX - 4} y={iconY - 4} width="12" height="12">
+              {React.cloneElement(interval.icon, {
+                className: `${interval.icon.props.className} absolute`,
+                style: {
+                  color: 'white',
+                  width: '60%',
+                  height: '60%',
+                  opacity: 1,
+                },
+              })}
+            </foreignObject>
+          </>
+        ) : null}
       </g>
     );
   };

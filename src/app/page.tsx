@@ -1,6 +1,6 @@
 'use client';
 
-import CentralModule from '@/modules/CentralModule/CentralModule';
+import CentralModule from '@/modules/CentralModule/CentralModule2';
 
 export default function Home() {
   return (
