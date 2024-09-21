@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import ControllableYoutubePlayer from '@/modules/ControllableYoutubePlayer/ControllableYoutubePlayer';
 import AnalogClock from '@/modules/AnalogClock/AnalogClock';
-import { Interval } from './types';
 import { buildInitialIntervals } from './model';
+import { Interval } from '../types';
 
-const WATCH_TIME = 1 * 60; // 15 minutes in seconds
+const WATCH_TIME = 0.5 * 60; // 15 minutes in seconds
 const BREAK_TIME = 0.5 * 60; // 10 minutes in seconds
 
 const CentralModule: React.FC = () => {
@@ -32,18 +32,23 @@ const CentralModule: React.FC = () => {
   }, []);
 
   const handleReachedTimeLimit = () => {
-    // setTimeLimit(0);
+    setTimeLimit(0);
+    setPlayingMode('break');
     // // TODO: add a ref to setTimeout and disable it on component unmount
-    // setTimeout(() => {}, BREAK_TIME * 1000);
+    setTimeout(() => {
+      setIntervals(buildInitialIntervals(new Date(), WATCH_TIME, BREAK_TIME));
+      setTimeLimit(WATCH_TIME);
+      setPlayingMode('paused');
+    }, BREAK_TIME * 1000);
   };
 
   return (
     <div>
       <ControllableYoutubePlayer
         videoId="wVH6vZiWrl8"
-        // onPlayPause={handlePlayPause}
-        timeLimit={WATCH_TIME}
-        // onTimeLimit={handleReachedTimeLimit}
+        onPlayPause={handlePlayPause}
+        timeLimit={timeLimit}
+        onTimeLimit={handleReachedTimeLimit}
         renderWidget={() => (
           <div className="w-96">
             <AnalogClock intervals={intervals} options={{ showIcons: false }} />

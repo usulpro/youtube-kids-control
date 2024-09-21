@@ -1,4 +1,4 @@
-import { Interval } from './types';
+import { Interval } from "../types";
 
 const formatTime = (date: Date): string => {
   return date.toTimeString().slice(0, 5);
@@ -14,8 +14,8 @@ const createInterval = (
   type: 'watch' | 'break',
 ): Interval => {
   return {
-    startTime: formatTime(startTime),
-    endTime: formatTime(endTime),
+    startTime,
+    endTime,
     icon: type === 'watch' ? '🎥' : '⏸️',
     color: type === 'watch' ? '#059669' : '#DC2626',
     label: type === 'watch' ? 'Watch Time' : 'Break Time',

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ControllableYoutubePlayer from '@/modules/ControllableYoutubePlayer/ControllableYoutubePlayer';
 import AnalogClock from '@/modules/AnalogClock/AnalogClock';
-import { Interval } from './types';
+import { Interval } from '../types';
 
 
 

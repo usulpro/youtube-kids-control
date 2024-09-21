@@ -113,7 +113,7 @@ const ControllableYoutubePlayer: React.FC<YouTubePlayerProps> = ({
     if (playerRef.current?.pauseVideo) {
       playerRef.current.pauseVideo();
     }
-    // onTimeLimit();
+    onTimeLimit();
   }, [stopTimer]);
 
   const togglePlay = useCallback(() => {
