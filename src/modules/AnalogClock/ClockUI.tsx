@@ -1,15 +1,5 @@
 import React from 'react';
-
-type IntervalStatus = 'passed' | 'current' | 'upcoming';
-
-type Interval = {
-  startTime: string;
-  endTime: string;
-  icon: React.ReactElement;
-  color: string;
-  label: string;
-  status: IntervalStatus;
-};
+import { Interval } from '../types';
 
 type ClockUIProps = {
   hours: number;
@@ -224,9 +214,10 @@ const ClockUI: React.FC<ClockUIProps> = ({
   };
 
   const createIntervalSector = (interval: Interval) => {
-    const timeToAngle = (time: string) => {
-      const [, m] = time.split(':').map(Number);
-      return m * 6;
+    const timeToAngle = (time: Date): number => {
+      const minutes = time.getMinutes();
+      const seconds = time.getSeconds();
+      return (minutes * 60 + seconds) * 0.1;
     };
 
     const startAngle = timeToAngle(interval.startTime);
@@ -261,7 +252,7 @@ const ClockUI: React.FC<ClockUIProps> = ({
     const iconX = center + iconRadius * Math.sin((iconAngle * Math.PI) / 180);
     const iconY = center - iconRadius * Math.cos((iconAngle * Math.PI) / 180);
 
-    const opacity = clockTheme.opacity[interval.status];
+    const opacity = clockTheme.opacity[interval.status!];
 
     return (
       <g key={interval.startTime} xlinkTitle={interval.label}>
