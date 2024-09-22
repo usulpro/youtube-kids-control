@@ -10,6 +10,7 @@ import {
   MdFullscreenExit,
 } from 'react-icons/md';
 import SeekBar from './SeekBar';
+import { useOverlay } from './useOverlay';
 
 interface ControlPanelProps {
   isPlaying: boolean;
@@ -30,6 +31,8 @@ const formatTime = (time: number) => {
   return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 };
 
+
+
 const ControlPanel: React.FC<ControlPanelProps> = ({
   isPlaying,
   isTimeLimitReached,
@@ -42,36 +45,11 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   isFullscreen,
   toggleFullscreen,
 }) => {
-  const [isHovered, setIsHovered] = useState(false);
   const [volume, setVolume] = useState(100);
   const [isMuted, setIsMuted] = useState(false);
-  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const showControls = !isPlaying || isHovered;
-
-  useEffect(() => {
-    if (isPlaying && !isHovered) {
-      hideTimeoutRef.current = setTimeout(() => setIsHovered(false), 3000);
-    }
-    return () => {
-      if (hideTimeoutRef.current) {
-        clearTimeout(hideTimeoutRef.current);
-      }
-    };
-  }, [isPlaying, isHovered]);
-
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-    if (hideTimeoutRef.current) {
-      clearTimeout(hideTimeoutRef.current);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    if (isPlaying) {
-      hideTimeoutRef.current = setTimeout(() => setIsHovered(false), 3000);
-    }
-  };
+  const { handleMouseEnter, handleMouseLeave, showControls } = useOverlay({
+    isPlaying,
+  });
 
   const toggleMute = useCallback(() => {
     if (playerRef.current) {
@@ -108,14 +86,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
       onMouseLeave={handleMouseLeave}
     >
       <div className="relative flex items-center space-x-2 text-white mb-4">
-        {/* <input
-          type="range"
-          min="0"
-          max={duration}
-          value={currentTime}
-          onChange={(e) => onSeek(Number(e.target.value))}
-          className="custom-range flex-grow"
-        /> */}
         <SeekBar
           currentTime={currentTime}
           duration={duration}

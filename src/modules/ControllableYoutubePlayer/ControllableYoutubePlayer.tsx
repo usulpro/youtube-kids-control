@@ -1,15 +1,22 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useFullscreen } from './useFullscreen';
 import ControlPanel from './ControlPanel';
+import WidgetPanel from './WidgetPanel';
 
 interface YouTubePlayerProps {
   videoId: string;
   timeLimit: number; // in seconds
+  onPlayPause?: (isPlaying: boolean) => void;
+  onTimeLimit?: () => void;
+  renderWidget?: (state: object, actions: object) => React.ReactElement;
 }
 
 const ControllableYoutubePlayer: React.FC<YouTubePlayerProps> = ({
   videoId,
   timeLimit,
+  onPlayPause = () => null,
+  onTimeLimit = () => null,
+  renderWidget = (state, actions) => null,
 }) => {
   const [timeRemaining, setTimeRemaining] = useState(timeLimit);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -65,12 +72,14 @@ const ControllableYoutubePlayer: React.FC<YouTubePlayerProps> = ({
       if (!isTimeLimitReached) {
         setIsPlaying(true);
         startTimer();
+        if (onPlayPause) onPlayPause(true); // Call the callback
       } else {
         event.target.pauseVideo();
       }
     } else {
       setIsPlaying(false);
       stopTimer();
+      if (onPlayPause) onPlayPause(false); // Call the callback
     }
   };
 
@@ -104,6 +113,7 @@ const ControllableYoutubePlayer: React.FC<YouTubePlayerProps> = ({
     if (playerRef.current?.pauseVideo) {
       playerRef.current.pauseVideo();
     }
+    onTimeLimit();
   }, [stopTimer]);
 
   const togglePlay = useCallback(() => {
@@ -128,6 +138,10 @@ const ControllableYoutubePlayer: React.FC<YouTubePlayerProps> = ({
         className="absolute top-0 left-0 w-full h-full"
       ></div>
       <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 flex flex-col justify-end">
+        <WidgetPanel
+          renderWidget={() => renderWidget({}, {})}
+          isPlaying={isPlaying}
+        />
         <ControlPanel
           isPlaying={isPlaying}
           isTimeLimitReached={isTimeLimitReached}

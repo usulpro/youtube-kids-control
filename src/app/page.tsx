@@ -1,16 +1,12 @@
 'use client';
 
-import ControllableYoutubePlayer from '@/modules/ControllableYoutubePlayer/ControllableYoutubePlayer';
-import { VIDEO_CONFIG } from '@/config';
+import CentralModule from '@/modules/CentralModule/CentralModule2';
 
 export default function Home() {
   return (
     <main>
       <h1>Youtube player with Parent control</h1>
-      <ControllableYoutubePlayer
-        videoId="wVH6vZiWrl8"
-        timeLimit={VIDEO_CONFIG.DEFAULT_VIDEO_LENGTH}
-      />
+      <CentralModule />
     </main>
   );
 }
